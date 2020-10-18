@@ -1,0 +1,14 @@
+Add "required" fields and UI validation
+Add success popups
+fix bug where if a character's class is left bank they show up as "the undefined"
+\# Remove empty string player if exists
+Allow querying by multiple years (2019-2020)
+Make it so changing the year refreshes the log, not just changing the person
+Make year a dropdown.
+Add race support
+	And pie charts
+		Each play once
+		Each character once
+	Add ability to create character with race
+		Show dropdown for existing races.
+	Backfill data

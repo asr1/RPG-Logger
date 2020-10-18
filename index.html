@@ -1,0 +1,331 @@
+<html>
+    <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300,700" rel="stylesheet" type="text/css">
+				<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<!-- Latest compiled and minified CSS -->
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+		<script
+		  src="https://code.jquery.com/jquery-3.4.1.min.js"
+		  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+		  crossorigin="anonymous"></script>
+		  
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-backstretch/2.1.18/jquery.backstretch.min.js"></script>
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<link rel="icon" href="favicon.ico">
+		<title>RPG Log</title>
+	</head>
+    
+	<body class="py-4" ng-app="rpgLog" ng-controller="logCtrl" id="myControllerElementId">
+		<div class="container-narrow">
+			<h1>Log Plays</h1>
+			<div class="col-lg-12">
+				<div class="col-lg-2"></div>
+				<div class="col-lg-8">
+					<div class="col text-center">
+						<span><button class="btn btn-primary" ng-click="pwpromptIfReadonly(); toggleLog = !toggleLog "><i class="fa fa-plus" aria-hidden="true"></i> Log play</button></span>
+					</div>
+				</div>
+				<div class="col-lg-2"></div>
+			</div> 
+			<div class="col-lg-12">
+				<div class="col-md-3"></div>
+				<div id="submitDiv" ng-class="{editmode: editing != undefined}" class="col-lg-8 ng-hide form-parent" ng-hide="toggleLog">
+				<div id="add" ng-hide="editing">
+					<form>
+						<label class="label-left">Date: </label><input type="date" ng-model="dateToLog" style="height:25px; width:145px"/> <br>
+						<label class="label-left">Game Name: </label><select ng-model="gameToLog" ng-options="game.name for game in games"></select> <label> OR new game: </label><input type="text" ng-change="gameToLog.id = undefined" ng-model="gameToLog.name"></input><br>
+						<label class="label-left">Players: </label><select ng-disabled="!enableEditMode" size="7" class="top-aligned" ng-model="playersToLog" ng-options="player.name for player in playerNames" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="newPlayerButton" ng-click="playerNames.push({'name':newPlayer})" ng-disabled="!enableEditMode">Add new player</button><br>
+						<label class="label-left">length: </label><input type="number" step="0.5" ng-model="lengthToLog"></input> <br>
+						<label class="label-left">Campaign:  </label><select ng-model="campaignToLog" ng-options="campaign.name for campaign in campaigns"></select> <label> OR new campaign: </label><input id="campaignBox" type="text" ng-change="campaignToLog.id = undefined" ng-model="campaignToLog.name"></input><br>
+						
+						<div class="row">
+							<div class="col-md-1"></div>
+							<div class="col-md-3">
+								<h4 ng-if="playersToLog">GM</h2>
+								<div ng-repeat="player in playersToLog">
+									<input type="checkbox" ng-model="player.isgm" ng-click="setGm(player.isgm, player)"></input> <label>{{player.name}}</label>
+								</div>
+							</div>
+							<div class="col-md-2"></div>
+							<div ng-if="playersToLog" class="col-md-5">
+								<h4 >Characters</h2>
+								<label> Add new character:</label><br>
+								<div class="indent-two">
+									<label class="smallLabel">Name: </label><input type="text" ng-model="newCharName"></input><br>
+									<label class="smallLabel">Class: </label><input type="text" ng-model="newCharClass"></input>
+									<button class="btn btn-primary" id="newCharacterButton" ng-click="characters.push({'name':newCharName, 'class':newCharClass})">Add new Character</button>
+								</div>
+								<div ng-repeat="player in playersToLog">
+									
+										<label>{{player.name}} played: </label>
+										<div class="indent-one">
+										<select ng-model="player.characterToLog" ng-change="
+												charactersToLog.push({
+												'playerid' : player.id,
+												'charName' : player.characterToLog.name,
+												'charClass' : player.characterToLog.class,
+												'charId': player.characterToLog.id})" 
+												ng-options="character.name for character in characters">
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						
+						<div class="col text-center"><input type="button" ng-disabled="!enableEditMode" class="btn btn-primary submit" value="Submit" ng-click="logAll(dateToLog, gameToLog, playersToLog, lengthToLog, campaignToLog, charactersToLog)" /></div>
+					</form>
+				</div>
+				
+				<!--Edit mode-->
+				<div id="edit" ng-hide="!editing">
+					<form>
+						<label class="label-left">Date: </label><input ng-change="updateDate(editing)" type="date" ng-model="editing.dateplayed" style="height:25px; width:145px"/> <br>
+						
+						<label class="label-left">Game Name: </label><select ng-change="changeGameForPlay(editing)" ng-model="editing.game" ng-options="game.name for game in games"></select> <label> OR new game: </label><input type="text" ng-change="editing.game.id = undefined;" ng-blur="editGameName(editing)" ng-model="editing.game.name"></input><br>
+						
+						<label class="label-left">Players: </label><select size="7" ng-change="updatePlayers(editing)" class="top-aligned" ng-model="editing.players" ng-selected="editing.players" ng-options="player.name for player in playerNames track by player.id" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="editNewPlayerButton" ng-click="playerNames.push({'name':newPlayer})">Add new player</button><br>
+						
+						<label class="label-left">length: </label><input type="number" ng-blur="editLength(editing)" ng-model="editing.length"></input> <br>
+						
+						<label class="label-left">Campaign:  </label><select ng-change="changeCampaignForPlay(editing)" ng-model="editing.campaign" ng-options="campaign.name for campaign in campaigns"></select> <label> OR new campaign: </label><input ng-blur="editCampaignName(editing)" id="editCampaignBox" type="text" ng-change="editing.campaign.id = undefined" ng-model="editing.campaign.name"></input><br>
+						
+						<div class="row">
+							<div class="col-md-1"></div>
+							<div class="col-md-3">
+								<h4 ng-if="editing.players">GM</h2>
+								<div ng-repeat="player in editing.players">
+									<input type="checkbox" ng-model="player.isgm" ng-click="editGm(player.isgm, player, editing)"></input> <label>{{player.name}}<i ng-click="confirmPlayerDelete(player, editing)" class="fa fa-times righticon2 fa-lg"></i></label>
+								</div>
+							</div>
+							<div class="col-md-2"></div>
+							<div ng-if="editing.players" class="col-md-5">
+								<h4 >Characters</h2>
+								<label> Add new character:</label><br>
+								<div class="indent-two">
+									<label class="smallLabel">Name: </label><input type="text" ng-model="newCharName"></input><br>
+									<label class="smallLabel">Class: </label><input type="text" ng-model="newCharClass"></input>
+									<button class="btn btn-primary" id="newCharacterButton" ng-click="characters.push({'name':newCharName, 'class':newCharClass})">Add new Character</button>
+								</div>
+								<div ng-repeat="player in editing.players">
+									
+										<label>{{player.name}} played: </label>
+										<div class="indent-one">
+										<select ng-init="characterToLog={'name':player.charname}" ng-model="characterToLog" ng-change="
+												updateCharater(editing,{
+												'playerid' : player.id,
+												'charName' : characterToLog.name,
+												'charClass' : characterToLog.class,
+												'charId': characterToLog.id})" 
+												ng-options="character.name for character in characters track by character.name">
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						
+						<div class="col text-center"><input type="button" class="btn btn-primary submit" value="Done" ng-click="editing = undefined" /></div>
+					</form>
+				</div>
+				
+				</div>
+				<div class="col-lg-2"></div>
+			</div>
+
+
+		<h1>View Stats</h1>
+		<div>
+			<label>Person</label><select ng-model="readPlayer" ng-change="getStats(readPlayer, readYear)" ng-options="player.name for player in playerNames"></select>
+			<label>Year</label><input ng-init="readYear=2020" ng-model="readYear"></input>
+			<div ng-if="allgames" class="col-lg-12">
+				<div class="col-lg-3"><h4>All plays</h4></div>
+				<p>{{getNumGames(allgames)}} games, {{getHours(uniquePlays)}} hours</p>
+				<div class="col-lg-9"></div>
+				<div class="grid">
+				
+					<!--Plays by game / campaign-->
+					<div class="row newrow">
+						
+						<div class="col-lg-3"></div>
+						<div  class="col-lg-8">
+							
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th></th>
+										<th>Game</th>
+										<th>Total</th>
+										<th>Was GM</th>
+										<th>Total length</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="play in allgames track by $index"
+										ng-if="shouldShow(play)"> 
+										<td ng-if="shouldShow(play)" >
+											<button
+												ng-if="!play.iscampaign && isShowing(play.id)"
+												ng-click="gameShowStates[play.id] = false">
+												-
+											</button>
+											<button
+												ng-if="!play.iscampaign && !isShowing(play.id)"
+												ng-click="gameShowStates[play.id] = true">
+												+
+											</button>
+
+										</td>
+										<td ng-if="shouldShow(play)" 
+											ng-class="{'indent-one': play.iscampaign,'strong game-row': !play.iscampaign}">
+											{{play.game}}
+										</td>
+										<td ng-if="shouldShow(play)"  class="center" ng-class="{strong: !play.iscampaign}">{{play.count}}</td>
+										<td ng-if="shouldShow(play)"  class="center" >{{play.dmcount}}</td>
+										<td ng-if="shouldShow(play)"  class="center" >{{play.iscampaign ? "--" : play.length}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="col-lg-1"></div>
+				
+					<div class="row" ng-if="gamesByDays">
+						<!--Plays by day of week-->
+						<div class="col-lg-12" >
+							<div class="col-lg-3"><h4>Plays by day of week</h4></div>
+							<div class="newrow" style="margin-bottom:40px;">
+								<div id="daychart">
+									<ul class="bar-graph">
+									  <li class="bar-graph-axis">
+										<div class="bar-graph-label">{{nearest5Multiple(getMax(gamesByDays))}}</div>
+										<div class="bar-graph-label">{{.8*nearest5Multiple(getMax(gamesByDays))}}</div>
+										<div class="bar-graph-label">{{.6*nearest5Multiple(getMax(gamesByDays))}}</div>
+										<div class="bar-graph-label">{{.4*nearest5Multiple(getMax(gamesByDays))}}</div>
+										<div class="bar-graph-label">{{.2*nearest5Multiple(getMax(gamesByDays))}}</div>
+										<div class="bar-graph-label">0</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Mon')}};" title="{{gamesByDays['Mon']}}">
+										<div class="percent">{{gamesByDays["Mon"]}}</div>
+										<div class="description">Monday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Tue')}};" title="{{gamesByDays['Tue']}}">
+										<div class="percent">{{gamesByDays['Tue']}}</div>
+										<div class="description">Tuesday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Wed')}};" title="{{gamesByDays['Wed']}}">
+										<div class="percent">{{gamesByDays['Wed']}}</div>
+										<div class="description">Wednesday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Thu')}}" title="{{gamesByDays['Thu']}}">
+										<div class="percent">{{gamesByDays['Thu']}}</div>
+										<div class="description">Thursday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Fri')}}" title="{{gamesByDays['Fri']}}">
+										<div class="percent">{{gamesByDays['Fri']}}</div>
+										<div class="description">Friday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Sat')}}" title="{{gamesByDays['Sat']}}">
+										<div class="percent">{{gamesByDays['Sat']}}</div>
+										<div class="description">Saturday</div>
+									  </li>
+									  <li class="bar primary" style="height: {{getHeightForDay('Sun')}}" title="{{gamesByDays['Sun']}}">
+										<div class="percent">{{gamesByDays['Sun']}}</div>
+										<div class="description">Sunday</div>
+									  </li>
+									</ul>
+
+								</div>
+							</div>
+							<div class="col-lg-8"></div>
+							<div class="col-lg-1"></div>
+						</div>
+					</div>
+					
+					<!--Frequently plays with-->
+					<div class="col-lg-3"><h4>Frequently plays with</h4></div>
+					<div class="row newrow head">
+						
+						<div class="col-lg-3"></div>
+						<div  class="col-lg-8">
+							
+							<table class="table table-striped stuffafter">
+								<tr>
+									<th>Player</th>
+									<th>Times</th>
+								</tr>
+								<tr ng-repeat="play in playedWith track by $index">
+									<td ng-class="{'indent-one': play.iscampaign}">{{play.name}}</td>
+									<td class="center" ng-class="{strong: !play.iscampaign}">{{play.count}}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					
+					<div class="row newrow" style="margin-top:-10%">
+						<!--Frequently plays As (each play counts once)-->
+						<div ng-show="playedAs.length">
+							<div class="col-lg-3"><h4 style="margin-bttom:-10%">Frequently plays as</h4></div>
+							<div class="row newrow"><p style="margin-top:99px; margin-left: 40px">Each play counts once</p>
+								<div id="chartContainer" style="margin-left:200px; height: 300px; width: 400px;"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="row newrow" style="margin-top:-30px;">
+						<!--Frequently plays As (each character counts once)-->
+						<div ng-show="playedAs.length" style="margin-bottom:40px">
+							<div class="col-lg-5"><h4 style="margin-top:10%">Frequently makes characters of class</h4></div>
+							<div class="row newrow"><p style="margin-top:48px; margin-left: 40px">Each character counts once</p>
+								<div id="chartContainer2" style="margin-left:200px; height: 300px; width: 400px;"></div>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<h1>View Plays</h1>
+			<ul class="thumbnails">
+				<li ng-repeat="play in plays track by $index" class="clearfix">
+					<div class="well row col-lg-10" style="">
+						<div class="col-lg-3" style=""></div>
+						{{toReadableDate(play.dateplayed)}}
+							<i ng-class="{disabled: !enableEditMode}" ng-click="!enableEditMode || confirmDelete(play)" class="fa fa-times righticon fa-lg"></i>
+							<i ng-class="{disabled: !enableEditMode}" ng-click="!enableEditMode ||  editPlay(play)" class="fa fa-pencil righticon fa-lg"></i>
+							<i ng-class="{disabled: !enableEditMode}" ng-click="!enableEditMode ||  clonePlay(play)" class="fa fa-clone righticon fa-lg"></i>
+						<div class="col-lg-6">
+							<h4>{{play.name}}</h4>
+							<span style="white-space:pre-wrap;"> {{play.campaignName}}</span><br>
+							<span style="white-space:pre-wrap;"> {{play.length}} hours</span>
+							<div class="" ng-repeat="gm in getGms(play.id) track by gm.id" class="clearfix">
+								{{gm.name}} {{gm.charname ? 
+										"(" + gm.charname + " " + (gm.class? "the " + (gm.race? gm.race : "") + " " + gm.class + ")" : ")") 
+									: ""
+										 
+								}}
+							</div> ran for 
+							<div class="" ng-repeat="player in getPlayers(play.id) track by player.id" class="clearfix">
+								{{player.name}} {{player.charname ? "as" : ""}} {{player.charname}} {{player.class? "the" : ""}} {{player.race}} {{player.class}}
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	</body>
+	<script src="src/rpg-log.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</html>
