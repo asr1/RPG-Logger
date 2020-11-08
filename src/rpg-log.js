@@ -678,10 +678,9 @@ app.controller('logCtrl', function($scope, $http){
 		});
 		let newChars = await addNewCharacters(unknownChars);
 		
-		// Untested code. Should fix the bug where a new player with a new character doesn't log
 		let newCharOffset = 0;
 		newChars.forEach( (chr) => {
-			if(chr[0] === undefined) {
+			if(isNaN(chr[0])) {
 				chr[0] = newIds[newCharOffset]; // Should work if the new characters and players log in the same order. Here be errors?
 				newCharOffset++;
 			}
