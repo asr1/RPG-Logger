@@ -146,7 +146,7 @@
 		<h1>View Stats</h1>
 		<div>
 			<label>Person</label><select ng-model="readPlayer" ng-change="getStats(readPlayer, readYear)" ng-options="player.name for player in playerNames"></select>
-			<label>Year</label><input ng-init="readYear=2020" ng-model="readYear"></input>
+			<label>Year</label><input ng-init="readYear=2021" ng-model="readYear"></input>
 			<div ng-if="allgames" class="col-lg-12">
 				<div class="col-lg-3"><h4>All plays</h4></div>
 				<p>{{getNumGames(allgames)}} games, {{getHours(uniquePlays)}} hours</p>
