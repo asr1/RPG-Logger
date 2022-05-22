@@ -43,7 +43,7 @@
 					<form>
 						<label class="label-left">Date: </label><input type="date" ng-model="dateToLog" style="height:25px; width:145px"/> <br>
 						<label class="label-left">Game Name: </label><select ng-model="gameToLog" ng-options="game.name for game in games"></select> <label> OR new game: </label><input type="text" ng-change="gameToLog.id = undefined" ng-model="gameToLog.name"></input><br>
-						<label class="label-left">Players: </label><select ng-disabled="!enableEditMode" size="7" class="top-aligned" ng-model="playersToLog" ng-options="player.name for player in playerNames" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="newPlayerButton" ng-click="playerNames.push({'name':newPlayer})" ng-disabled="!enableEditMode">Add new player</button><br>
+						<label class="label-left">Players: </label><select ng-disabled="!enableEditMode" size="17" class="top-aligned" ng-model="playersToLog" ng-options="player.name for player in playerNames" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="newPlayerButton" ng-click="playerNames.push({'name':newPlayer})" ng-disabled="!enableEditMode">Add new player</button><br>
 						<label class="label-left">length: </label><input type="number" step="0.5" ng-model="lengthToLog"></input> <br>
 						<label class="label-left">Campaign:  </label><select ng-model="campaignToLog" ng-options="campaign.name for campaign in campaigns"></select> <label> OR new campaign: </label><input id="campaignBox" type="text" ng-change="campaignToLog.id = undefined" ng-model="campaignToLog.name"></input><br>
 						
@@ -93,9 +93,9 @@
 						
 						<label class="label-left">Game Name: </label><select ng-change="changeGameForPlay(editing)" ng-model="editing.game" ng-options="game.name for game in games"></select> <label> OR new game: </label><input type="text" ng-change="editing.game.id = undefined;" ng-blur="editGameName(editing)" ng-model="editing.game.name"></input><br>
 						
-						<label class="label-left">Players: </label><select size="7" ng-change="updatePlayers(editing)" class="top-aligned" ng-model="editing.players" ng-selected="editing.players" ng-options="player.name for player in playerNames track by player.id" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="editNewPlayerButton" ng-click="playerNames.push({'name':newPlayer})">Add new player</button><br>
+						<label class="label-left">Players: </label><select size="17" ng-change="updatePlayers(editing)" class="top-aligned" ng-model="editing.players" ng-selected="editing.players" ng-options="player.name for player in playerNames track by player.id" multiple></select><label style="margin-left:5px">New player: </label><input type="text" ng-model="newPlayer"></input><button class="btn btn-primary" id="editNewPlayerButton" ng-click="playerNames.push({'name':newPlayer})">Add new player</button><br>
 						
-						<label class="label-left">length: </label><input type="number" ng-blur="editLength(editing)" ng-model="editing.length"></input> <br>
+						<label class="label-left">length: </label><input type="number" step="0.5" ng-blur="editLength(editing)" ng-model="editing.length"></input> <br>
 						
 						<label class="label-left">Campaign:  </label><select ng-change="changeCampaignForPlay(editing)" ng-model="editing.campaign" ng-options="campaign.name for campaign in campaigns"></select> <label> OR new campaign: </label><input ng-blur="editCampaignName(editing)" id="editCampaignBox" type="text" ng-change="editing.campaign.id = undefined" ng-model="editing.campaign.name"></input><br>
 						
@@ -146,7 +146,7 @@
 		<h1>View Stats</h1>
 		<div>
 			<label>Person</label><select ng-model="readPlayer" ng-change="getStats(readPlayer, readYear)" ng-options="player.name for player in playerNames"></select>
-			<label>Year</label><input ng-init="readYear=2021" ng-model="readYear"></input>
+			<label>Year</label><input ng-init="readYear=2022" ng-model="readYear"></input>
 			<div ng-if="allgames" class="col-lg-12">
 				<div class="col-lg-3"><h4>All plays</h4></div>
 				<p>{{getNumGames(allgames)}} games, {{getHours(uniquePlays)}} hours</p>

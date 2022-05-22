@@ -197,7 +197,7 @@ app.controller('logCtrl', function($scope, $http){
 		});
 		let newIds = await addNewPlayers(unknownPlayers);
 		playerIds = playerIds.concat(newIds);
-		
+		// There's a bug where new players who get added with a character need to be added twice. 
 		await updatePlayerPlays(playerIds, playid);
 	}
 	

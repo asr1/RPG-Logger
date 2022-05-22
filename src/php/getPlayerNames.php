@@ -1,7 +1,7 @@
 <?php
 
 include('config.php');
-$query=" select name, players.id from players inner join playerplays on players.id=playerplays.playerid group by name order by count(name) desc";
+$query=" select name, players.id from players inner join playerplays on players.id=playerplays.playerid group by name order by count(name) desc, name";
 $result = $mysqli->query($query) or die($mysqli->error.__LINE__);
 $arr = array();
 if($result->num_rows > 0){
